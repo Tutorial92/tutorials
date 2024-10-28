@@ -194,6 +194,35 @@ router.get("/latest-posts", async (req, res) => {
   }
 });
 
+// Search posts by title or short_description
+
+router.get("/search", async (req, res) => {
+  const { q } = req.query;
+
+  if (!q) {
+    return res
+      .status(400)
+      .json({ status: false, message: "Query parameter 'q' is required." });
+  }
+
+  try {
+    const posts = await Post.find({
+      $or: [
+        { title: { $regex: q, $options: "i" } },
+        { short_description: { $regex: q, $options: "i" } },
+      ],
+    });
+
+    res.json({ status: true, posts });
+  } catch (error) {
+    res.status(500).json({
+      status: false,
+      message: "An error occurred",
+      error: error.message,
+    });
+  }
+});
+
 //Get post by id
 router.get("/:id", async (req, res) => {
   const { id } = req.params;
