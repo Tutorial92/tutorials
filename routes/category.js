@@ -19,7 +19,7 @@ router.post("/", async (req, res) => {
     });
 
     const newCategory = await category.save();
-    res.status(201).json({
+    res.status(200).json({
       status: true,
       message: "Category successfully created",
       data: newCategory,

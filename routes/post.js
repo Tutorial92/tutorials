@@ -46,8 +46,8 @@ router.post(
 
       // Save the new blog post
       const savedBlog = await newBlog.save();
-      res.status(201).json({
-        status: false,
+      res.status(200).json({
+        status: true,
         message: "Blog saved successfully",
         data: savedBlog,
       });
