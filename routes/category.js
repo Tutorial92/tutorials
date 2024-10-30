@@ -19,18 +19,34 @@ router.post("/", async (req, res) => {
     });
 
     const newCategory = await category.save();
-    res.status(201).json(newCategory);
+    res.status(201).json({
+      status: true,
+      message: "Category successfully created",
+      data: newCategory,
+    });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({
+      status: false,
+      message: "Request failed",
+      error: err.message,
+    });
   }
 });
 // Get all products
 router.get("/", async (req, res) => {
   try {
     const category = await Category.find();
-    res.json(category);
+    res.json({
+      status: true,
+      message: "Categories fetched successfully",
+      data: Category,
+    });
   } catch (err) {
-    res.status(500).json(err);
+    res.status(500).json({
+      status: false,
+      message: "Request failed",
+      error: err.message,
+    });
   }
 });
 
@@ -50,7 +66,7 @@ router.delete("/:id", async (req, res) => {
     res.status(200).json({
       status: true,
       message: "Category deleted successfully",
-      deletedCategory,
+      data: deletedCategory,
     });
   } catch (err) {
     res.status(500).json({

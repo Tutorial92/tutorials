@@ -107,7 +107,11 @@ router.put(
 
       // Save updated blog
       const updatedBlog = await blog.save();
-      res.status(200).json(updatedBlog);
+      res.status(200).json({
+        status: true,
+        message: "Blog updated successfully",
+        data: updatedBlog,
+      });
     } catch (err) {
       res.status(500).json({
         status: false,
@@ -122,9 +126,17 @@ router.put(
 router.get("/", async (req, res) => {
   try {
     const blogs = await Post.find();
-    res.json(blogs);
+    res.json({
+      status: true,
+      message: "Blog fetched successfully",
+      data: blogs,
+    });
   } catch (err) {
-    res.status(500).json(err);
+    res.status(500).json({
+      status: false,
+      message: "An error occurred",
+      error: err.message,
+    });
   }
 });
 
@@ -141,7 +153,11 @@ router.get("/category/:category", async (req, res) => {
         .json({ status: false, message: "No posts found in this category" });
     }
 
-    res.status(200).json(posts);
+    res.status(200).json({
+      status: true,
+      message: "Blogs fetched successfully",
+      data: posts,
+    });
   } catch (err) {
     res.status(500).json({
       status: false,
@@ -213,7 +229,11 @@ router.get("/search", async (req, res) => {
       ],
     });
 
-    res.json({ status: true, posts });
+    res.json({
+      status: true,
+      message: "Searched blogs fetched successfully",
+      data: posts,
+    });
   } catch (error) {
     res.status(500).json({
       status: false,
@@ -234,7 +254,9 @@ router.get("/:id", async (req, res) => {
       return res.status(404).json({ status: false, message: "Post not found" });
     }
 
-    res.status(200).json(post);
+    res
+      .status(200)
+      .json({ status: true, message: "Blog fetched successfully", data: post });
   } catch (err) {
     res.status(500).json({
       status: false,
