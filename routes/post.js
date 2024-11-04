@@ -7,6 +7,7 @@ const { uploadImages } = require("../helper/uploadToCloudinary");
 // const { auth } = require("../middleware/auth");
 const multer = require("multer");
 const auth = require("../middleware/auth");
+const { validationResult } = require("express-validator");
 const upload = multer();
 cloudinary.config({
   cloud_name: config.cloud_name,
@@ -20,6 +21,15 @@ router.post(
   "/",
   upload.fields([{ name: "image", maxCount: 1 }]),
   async (req, res) => {
+    const errors = validationResult(req.body);
+    if (!errors.isEmpty()) {
+      res.status(400).json({
+        status: false,
+        message: "Request failed",
+        errors: errors.array(),
+      });
+      return;
+    }
     try {
       // Check for an existing blog with the same title
       const existingBlog = await Post.findOne({ title: req.body.title });
@@ -31,10 +41,22 @@ router.post(
 
       // Image upload handling
       const newBlog = new Post();
-      let path = "/images/";
-      let uploadResponse = await uploadImages(req.files.image[0].buffer, path);
-      newBlog.image = uploadResponse.secure_url;
+      try {
+        let path = "/images/";
+        let uploadResponse = await uploadImages(
+          req.files.image[0].buffer,
+          path
+        );
 
+        newBlog.image = uploadResponse.secure_url;
+      } catch (err) {
+        res.status(401).json({
+          status: false,
+          message: "Image upload failed.",
+          error: err.message,
+        });
+        return;
+      }
       // Set other blog properties
       newBlog.title = req.body.title;
       newBlog.description = req.body.description;
@@ -52,10 +74,12 @@ router.post(
         data: savedBlog,
       });
     } catch (err) {
+      console.log("error", err);
+
       res.status(500).json({
         status: false,
-        message: "An error occurred",
-        error: err.message,
+        message: "Request failed",
+        error: err,
       });
     }
   }
@@ -116,7 +140,7 @@ router.put(
       res.status(500).json({
         status: false,
         message: "An error occurred",
-        error: err.message,
+        error: err,
       });
     }
   }
@@ -146,7 +170,9 @@ router.get("/category/:category", async (req, res) => {
 
   try {
     // Find posts by category
-    const posts = await Post.find({ category: category });
+    const posts = await Post.find({
+      category: { $regex: category },
+    });
     if (posts.length === 0) {
       return res
         .status(404)
